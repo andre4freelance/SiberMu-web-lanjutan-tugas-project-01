@@ -1,0 +1,403 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+
+:root {
+  font-family: 'Outfit', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #0b0c10;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Custom Tailwind-like Utilities for React Themes */
+.bg-gradient-to-br {
+  background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
+}
+
+.from-slate-950 {
+  --tw-gradient-from: #020617;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(2, 6, 23, 0));
+}
+
+.via-purple-950 {
+  --tw-gradient-to: rgba(88, 28, 135, 0);
+  --tw-gradient-stops: var(--tw-gradient-from), #3b0764, var(--tw-gradient-to);
+}
+
+.to-indigo-950 {
+  --tw-gradient-to: #0f172a;
+}
+
+.via-emerald-950 {
+  --tw-gradient-to: rgba(6, 95, 70, 0);
+  --tw-gradient-stops: var(--tw-gradient-from), #022c22, var(--tw-gradient-to);
+}
+
+.to-teal-950 {
+  --tw-gradient-to: #042f2e;
+}
+
+.via-blue-950 {
+  --tw-gradient-to: rgba(30, 58, 138, 0);
+  --tw-gradient-stops: var(--tw-gradient-from), #172554, var(--tw-gradient-to);
+}
+
+.to-cyan-950 {
+  --tw-gradient-to: #083344;
+}
+
+.via-rose-950 {
+  --tw-gradient-to: rgba(136, 19, 55, 0);
+  --tw-gradient-stops: var(--tw-gradient-from), #4c0519, var(--tw-gradient-to);
+}
+
+.to-orange-950 {
+  --tw-gradient-to: #431407;
+}
+
+.via-fuchsia-950 {
+  --tw-gradient-to: rgba(112, 26, 117, 0);
+  --tw-gradient-stops: var(--tw-gradient-from), #4a044e, var(--tw-gradient-to);
+}
+
+.to-rose-950 {
+  --tw-gradient-to: #4c0519;
+}
+
+/* App Layout & Flex Centering */
+.app-container {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2rem 1rem;
+  box-sizing: border-box;
+  transition: background 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Radial ambient glow */
+.radial-glow-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  pointer-events: none;
+  transition: background 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.container-inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+/* Elegant header */
+.app-header {
+  text-align: center;
+}
+
+.sparkle-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.4rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 0.75rem;
+}
+
+.sparkle-icon {
+  color: #fbbf24;
+  animation: sparkle-pulse 2s infinite ease-in-out;
+}
+
+.app-header h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin: 0;
+  background: linear-gradient(to right, #ffffff, rgba(255, 255, 255, 0.6));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.02em;
+}
+
+/* Glassmorphism Quote Box */
+.quote-box {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 3rem 2.5rem 2.5rem 2.5rem;
+  box-sizing: border-box;
+  position: relative;
+  transition: box-shadow 0.8s ease-in-out;
+}
+
+/* Decorative Quote Marks */
+.quote-mark-top {
+  position: absolute;
+  top: 1.5rem;
+  left: 2rem;
+  color: rgba(255, 255, 255, 0.03);
+  pointer-events: none;
+  transform: rotate(180deg);
+}
+
+.quote-mark-bottom {
+  position: absolute;
+  bottom: 5.5rem;
+  right: 2rem;
+  color: rgba(255, 255, 255, 0.03);
+  pointer-events: none;
+}
+
+/* Quote content & transitions */
+.quote-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-height: 140px;
+  justify-content: center;
+}
+
+.quote-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  font-weight: 500;
+  line-height: 1.5;
+  margin: 0;
+  color: #f8fafc;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.quote-divider {
+  width: 40px;
+  height: 2px;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.2), transparent);
+  align-self: flex-start;
+}
+
+.quote-author {
+  font-size: 1.1rem;
+  font-weight: 400;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+  align-self: flex-end;
+  letter-spacing: 0.03em;
+}
+
+/* Fade transitions controlled by React */
+.fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.fade-out {
+  animation: fadeOut 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Footer / Action row */
+.quote-box-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  gap: 1rem;
+}
+
+/* Interactive Modern Buttons */
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.8rem 1.4rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  text-decoration: none;
+  border: 1px solid transparent;
+  outline: none;
+}
+
+.tweet-button {
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tweet-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #1d9bf0;
+  border-color: rgba(29, 155, 240, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(29, 155, 240, 0.15);
+}
+
+.tweet-button:active {
+  transform: translateY(0);
+}
+
+.new-quote-button {
+  background: #ffffff;
+  color: #0b0c10;
+}
+
+.new-quote-button:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.25);
+}
+
+.new-quote-button:active {
+  transform: translateY(0);
+}
+
+/* Icon animations */
+.refresh-icon {
+  transition: transform 0.4s ease;
+}
+
+.new-quote-button:hover .refresh-icon {
+  transform: rotate(180deg);
+}
+
+.spinning .refresh-icon {
+  animation: spin 0.4s linear infinite;
+}
+
+/* Footer details */
+.app-footer {
+  text-align: center;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.app-footer p {
+  margin: 0;
+}
+
+.stats-indicator {
+  font-family: monospace;
+  color: rgba(255, 255, 255, 0.15);
+}
+
+/* Keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes sparkle-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .app-header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .quote-box {
+    padding: 2.2rem 1.6rem 1.6rem 1.6rem;
+    border-radius: 20px;
+  }
+  
+  .quote-text {
+    font-size: 1.4rem;
+  }
+  
+  .quote-box-footer {
+    flex-direction: column;
+    margin-top: 2rem;
+    gap: 0.75rem;
+  }
+  
+  .action-button {
+    width: 100%;
+    justify-content: center;
+    padding: 0.75rem 1.2rem;
+  }
+  
+  .quote-mark-top {
+    top: 1rem;
+    left: 1rem;
+  }
+  
+  .quote-mark-bottom {
+    display: none; /* Hide bottom mark on mobile to save vertical space */
+  }
+}
+
+/* Hide standard Vite assets since we don't use them */
+#next-steps, .ticks, #spacer {
+  display: none !important;
+}
