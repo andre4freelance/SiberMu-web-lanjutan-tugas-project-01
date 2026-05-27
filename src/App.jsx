@@ -133,72 +133,72 @@ const DRUM_PADS = [
     keyCode: 81,
     idHeater: 'Heater-1',
     idPiano: 'Chord-1',
-    srcHeater: 'https://s3.amazonaws.com/freecodecamp/drums/Heater-1.mp3',
-    srcPiano: 'https://s3.amazonaws.com/freecodecamp/drums/Chord_1.mp3'
+    srcHeater: 'https://cdn.freecodecamp.org/curriculum/drum/Heater-1.mp3',
+    srcPiano: 'https://cdn.freecodecamp.org/curriculum/drum/Chord_1.mp3'
   },
   {
     keyChar: 'W',
     keyCode: 87,
     idHeater: 'Heater-2',
     idPiano: 'Chord-2',
-    srcHeater: 'https://s3.amazonaws.com/freecodecamp/drums/Heater-2.mp3',
-    srcPiano: 'https://s3.amazonaws.com/freecodecamp/drums/Chord_2.mp3'
+    srcHeater: 'https://cdn.freecodecamp.org/curriculum/drum/Heater-2.mp3',
+    srcPiano: 'https://cdn.freecodecamp.org/curriculum/drum/Chord_2.mp3'
   },
   {
     keyChar: 'E',
     keyCode: 69,
     idHeater: 'Heater-3',
     idPiano: 'Chord-3',
-    srcHeater: 'https://s3.amazonaws.com/freecodecamp/drums/Heater-3.mp3',
-    srcPiano: 'https://s3.amazonaws.com/freecodecamp/drums/Chord_3.mp3'
+    srcHeater: 'https://cdn.freecodecamp.org/curriculum/drum/Heater-3.mp3',
+    srcPiano: 'https://cdn.freecodecamp.org/curriculum/drum/Chord_3.mp3'
   },
   {
     keyChar: 'A',
     keyCode: 65,
     idHeater: 'Heater-4',
     idPiano: 'Give-us-a-Light',
-    srcHeater: 'https://s3.amazonaws.com/freecodecamp/drums/Heater-4.mp3',
-    srcPiano: 'https://s3.amazonaws.com/freecodecamp/drums/Give_us_a_light.mp3'
+    srcHeater: 'https://cdn.freecodecamp.org/curriculum/drum/Heater-4_1.mp3',
+    srcPiano: 'https://cdn.freecodecamp.org/curriculum/drum/Give_us_a_light.mp3'
   },
   {
     keyChar: 'S',
     keyCode: 83,
     idHeater: 'Clap',
     idPiano: 'Dry-Ohh',
-    srcHeater: 'https://s3.amazonaws.com/freecodecamp/drums/Heater-6.mp3',
-    srcPiano: 'https://s3.amazonaws.com/freecodecamp/drums/Dry_Ohh.mp3'
+    srcHeater: 'https://cdn.freecodecamp.org/curriculum/drum/Heater-6.mp3',
+    srcPiano: 'https://cdn.freecodecamp.org/curriculum/drum/Dry_Ohh.mp3'
   },
   {
     keyChar: 'D',
     keyCode: 68,
     idHeater: 'Open-HH',
     idPiano: 'Bld-Hhe',
-    srcHeater: 'https://s3.amazonaws.com/freecodecamp/drums/Dsc_Oh.mp3',
-    srcPiano: 'https://s3.amazonaws.com/freecodecamp/drums/Bld_Hhe.mp3'
+    srcHeater: 'https://cdn.freecodecamp.org/curriculum/drum/Dsc_Oh.mp3',
+    srcPiano: 'https://cdn.freecodecamp.org/curriculum/drum/Bld_Hhe.mp3'
   },
   {
     keyChar: 'Z',
     keyCode: 90,
     idHeater: 'Kick-n-Hat',
     idPiano: 'Punchy-Kick',
-    srcHeater: 'https://s3.amazonaws.com/freecodecamp/drums/Kick_n_Hat.mp3',
-    srcPiano: 'https://s3.amazonaws.com/freecodecamp/drums/punchy_kick_1.mp3'
+    srcHeater: 'https://cdn.freecodecamp.org/curriculum/drum/Kick_n_Hat.mp3',
+    srcPiano: 'https://cdn.freecodecamp.org/curriculum/drum/punchy_kick_1.mp3'
   },
   {
     keyChar: 'X',
     keyCode: 88,
     idHeater: 'Kick',
     idPiano: 'Side-Stick',
-    srcHeater: 'https://s3.amazonaws.com/freecodecamp/drums/RP4_KICK_1.mp3',
-    srcPiano: 'https://s3.amazonaws.com/freecodecamp/drums/side_stick_1.mp3'
+    srcHeater: 'https://cdn.freecodecamp.org/curriculum/drum/RP4_KICK_1.mp3',
+    srcPiano: 'https://cdn.freecodecamp.org/curriculum/drum/side_stick_1.mp3'
   },
   {
     keyChar: 'C',
     keyCode: 67,
     idHeater: 'Closed-HH',
     idPiano: 'Snare',
-    srcHeater: 'https://s3.amazonaws.com/freecodecamp/drums/Cev_H2.mp3',
-    srcPiano: 'https://s3.amazonaws.com/freecodecamp/drums/Brk_Snr.mp3'
+    srcHeater: 'https://cdn.freecodecamp.org/curriculum/drum/Cev_H2.mp3',
+    srcPiano: 'https://cdn.freecodecamp.org/curriculum/drum/Brk_Snr.mp3'
   }
 ];
 
@@ -246,8 +246,9 @@ function App() {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (activeTab !== 'drum' || !drumPower) return;
-      const key = e.key.toUpperCase();
-      const pad = DRUM_PADS.find(p => p.keyChar === key);
+      const key = (e.key || '').toUpperCase();
+      const code = e.keyCode;
+      const pad = DRUM_PADS.find(p => p.keyChar === key || p.keyCode === code);
       if (pad) {
         const clipId = soundBank === 0 ? pad.idHeater : pad.idPiano;
         playPadAudio(pad.keyChar, clipId);
