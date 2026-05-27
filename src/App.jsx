@@ -432,10 +432,7 @@ function App() {
                         onClick={() => playPadAudio(pad.keyChar, clipId)}
                         disabled={!drumPower}
                       >
-                        <span className="pad-letter">{pad.keyChar}</span>
-                        <span className="pad-descriptor">
-                          {drumPower ? (soundBank === 0 ? pad.idHeater : pad.idPiano).substring(0, 7) : '—'}
-                        </span>
+                        {pad.keyChar}
                         
                         {/* Mandatory HTML5 audio element */}
                         <audio

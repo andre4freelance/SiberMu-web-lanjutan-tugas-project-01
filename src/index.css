@@ -283,12 +283,17 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 0.25rem;
   cursor: pointer;
   outline: none;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   transition: all 0.15s cubic-bezier(0.25, 0.8, 0.25, 1);
   position: relative;
+  
+  /* Text Styling */
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #f8fafc;
 }
 
 .tactile-synth-pad:hover:not(:disabled) {
@@ -315,20 +320,7 @@ body {
   box-shadow: 0 0 20px 4px rgba(168, 85, 247, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
 }
 
-.pad-letter {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #f8fafc;
-}
-
-.pad-descriptor {
-  font-size: 0.65rem;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  color: rgba(255, 255, 255, 0.35);
-  text-transform: uppercase;
-}
+/* Removed pad-letter and pad-descriptor as button text must strictly equal keyChar */
 
 /* Right Control console panel */
 .controls-panel {
@@ -1064,9 +1056,6 @@ body {
 
   .tactile-synth-pad {
     border-radius: 12px;
-  }
-
-  .pad-letter {
     font-size: 1.4rem;
   }
 
