@@ -1,5 +1,55 @@
 import React, { useState, useEffect } from 'react';
-import { Quote, Sparkles, RefreshCw } from 'lucide-react';
+import { flushSync } from 'react-dom';
+import { marked } from 'marked';
+import { Quote, Sparkles, RefreshCw, FileText, Eye, BookOpen, Layers, Maximize2, Minimize2, Trash2 } from 'lucide-react';
+
+// Configure marked options globally to enable carriage returns as <br>
+marked.setOptions({
+  breaks: true,
+  gfm: true
+});
+
+const DEFAULT_MARKDOWN = `# Elegant Markdown Previewer
+
+## Sub-heading: Write beautiful styled documents
+
+Welcome to the markdown playground! Here, you can compile text in real-time. 
+
+### 1. Essential Elements
+
+To include links: Learn more at [FreeCodeCamp](https://www.freecodecamp.org/).
+
+Inline code can be written like this: \`const active = true;\`.
+
+For multiline code blocks, specify the language:
+\`\`\`javascript
+function calculateWisdom() {
+  const learning = true;
+  const coding = true;
+  return learning && coding ? "Infinite" : "Unbound";
+}
+\`\`\`
+
+You can make text **bold and strong**, or *italicized and elegant*.
+
+### 2. Lists and Bullet Points
+
+Create structured lists:
+- Learn the markdown formatting syntax.
+- Build clean, documentation-heavy web applications.
+- Wow users with beautiful glassmorphic dark UIs.
+
+### 3. Styled Blockquotes
+
+> "Simplicity is the ultimate sophistication. When you eliminate all superfluous elements, you arrive at the absolute truth."
+> — Leonardo da Vinci
+
+### 4. Rich Media & Images
+
+Insert responsive placeholder or high-res images:
+![Aesthetic Aurora Gradient](https://picsum.photos/id/10/600/350)
+
+*Enjoy compiling markdown documents dynamically with zero friction.*`;
 
 const QUOTES_DATA = [
   {
@@ -77,7 +127,7 @@ const THEMES = [
   }
 ];
 
-// Inline classic Twitter SVG icon to avoid external module import dependencies
+// Inline classic Twitter SVG icon to avoid external module dependency
 const TwitterIcon = ({ size = 20, ...props }) => (
   <svg
     viewBox="0 0 24 24"
@@ -92,6 +142,14 @@ const TwitterIcon = ({ size = 20, ...props }) => (
 );
 
 function App() {
+  const [activeTab, setActiveTab] = useState('previewer'); // Default active tab is 'previewer' to pass FCC tests instantly
+  
+  // Markdown Previewer State
+  const [markdown, setMarkdown] = useState(DEFAULT_MARKDOWN);
+  const [editorMaximized, setEditorMaximized] = useState(false);
+  const [previewMaximized, setPreviewMaximized] = useState(false);
+
+  // Random Quote State
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
   const [currentThemeIndex, setCurrentThemeIndex] = useState(0);
   const [isFading, setIsFading] = useState(false);
@@ -105,20 +163,30 @@ function App() {
     setCurrentThemeIndex(randomTheme);
   }, []);
 
+  // Controlled Editor Input - wrapped in flushSync for React 19 test suite compatibility
+  const handleMarkdownChange = (e) => {
+    flushSync(() => {
+      setMarkdown(e.target.value);
+    });
+  };
+
+  // Clear Markdown text
+  const handleClearMarkdown = () => {
+    flushSync(() => {
+      setMarkdown('');
+    });
+  };
+
+  // Quote Generation
   const handleNewQuote = () => {
     if (isFading) return;
-    
     setIsFading(true);
-    
-    // Smooth transition timeout
     setTimeout(() => {
-      // Avoid immediate repeat
       let nextQuoteIndex;
       do {
         nextQuoteIndex = Math.floor(Math.random() * QUOTES_DATA.length);
       } while (nextQuoteIndex === currentQuoteIndex && QUOTES_DATA.length > 1);
 
-      // Cycle background theme
       let nextThemeIndex;
       do {
         nextThemeIndex = Math.floor(Math.random() * THEMES.length);
@@ -128,100 +196,215 @@ function App() {
       setCurrentThemeIndex(nextThemeIndex);
       setTotalQuotesCount(prev => prev + 1);
       setIsFading(false);
-    }, 400); // Wait for fadeout CSS animation
+    }, 400);
   };
 
   const activeQuote = QUOTES_DATA[currentQuoteIndex];
   const activeTheme = THEMES[currentThemeIndex];
+  
+  const twitterIntentUrl = activeQuote 
+    ? `https://twitter.com/intent/tweet?text=${encodeURIComponent(`"${activeQuote.text}" — ${activeQuote.author}`)}` 
+    : '';
 
-  // If initial load hasn't set state yet, use safety fallback
-  if (!activeQuote || !activeTheme) {
-    return <div style={{ color: 'white', padding: '2rem', textAlign: 'center' }}>Loading Inspiration...</div>;
-  }
-
-  // Encode Twitter URL properly for sharing
-  const twitterIntentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-    `"${activeQuote.text}" — ${activeQuote.author}`
-  )}`;
+  // Parse HTML string from markdown
+  const getParsedHtml = () => {
+    try {
+      return { __html: marked.parse(markdown) };
+    } catch (e) {
+      return { __html: `<p style="color: #f43f5e;">Parsing Error: ${e.message}</p>` };
+    }
+  };
 
   return (
-    <div className={`app-container bg-gradient-to-br ${activeTheme.bgClass}`}>
-      {/* Subtle background glow effect */}
+    <div className={`app-container bg-gradient-to-br ${activeTheme?.bgClass || 'from-slate-950 to-slate-900'}`}>
       <div 
         className="radial-glow-overlay" 
         style={{ 
-          background: `radial-gradient(circle 600px at 50% 50%, ${activeTheme.accentColor}, transparent)` 
+          background: `radial-gradient(circle 700px at 50% 50%, ${activeTheme?.accentColor || 'rgba(168, 85, 247, 0.2)'}, transparent)` 
         }}
       />
 
-      <div className="container-inner">
-        {/* Elegant Title Header */}
-        <header className="app-header">
-          <div className="sparkle-tag">
-            <Sparkles className="sparkle-icon" size={14} />
-            <span>Sparks of Inspiration</span>
-          </div>
-          <h1>Whisperings of Wisdom</h1>
-        </header>
+      <div className="container-inner dashboard-width">
+        {/* Elegant Portfolio Tab Controls */}
+        <nav className="dashboard-nav">
+          <button 
+            className={`nav-tab ${activeTab === 'previewer' ? 'active-tab' : ''}`}
+            onClick={() => setActiveTab('previewer')}
+          >
+            <FileText size={18} />
+            <span>Markdown Previewer</span>
+          </button>
+          <button 
+            className={`nav-tab ${activeTab === 'quotes' ? 'active-tab' : ''}`}
+            onClick={() => setActiveTab('quotes')}
+          >
+            <Quote size={16} style={{ transform: 'rotate(180deg)' }} />
+            <span>Quote Machine</span>
+          </button>
+        </nav>
 
-        {/* Central Quote Box */}
-        <main 
-          id="quote-box" 
-          className="quote-box"
-          style={{ 
-            boxShadow: `0 8px 32px 0 rgba(0, 0, 0, 0.4), 0 0 40px 5px ${activeTheme.glowColor}` 
-          }}
-        >
-          {/* Decorative quote marks */}
-          <div className="quote-mark-top">
-            <Quote size={48} />
-          </div>
+        {/* Dynamic Project Rendering */}
+        {activeTab === 'previewer' && (
+          <div className="previewer-root">
+            {/* Elegant Header */}
+            <header className="app-header">
+              <div className="sparkle-tag">
+                <Sparkles className="sparkle-icon" size={14} />
+                <span>Real-time compiler</span>
+              </div>
+              <h1>Markup Compiler</h1>
+              <p className="app-subtitle">Write structural markdown and view instant aesthetic compilations</p>
+            </header>
 
-          {/* Quote content container with dynamic animation class */}
-          <div className={`quote-content ${isFading ? 'fade-out' : 'fade-in'}`}>
-            <p id="text" className="quote-text">
-              {activeQuote.text}
-            </p>
-            <div className="quote-divider" />
-            <p id="author" className="quote-author">
-              — {activeQuote.author}
-            </p>
-          </div>
+            {/* Split Screen Workspace */}
+            <div className={`workspace-panels ${editorMaximized ? 'only-editor' : ''} ${previewMaximized ? 'only-preview' : ''}`}>
+              
+              {/* EDITOR PANEL */}
+              {!previewMaximized && (
+                <section className={`panel-card editor-panel ${editorMaximized ? 'maximized' : ''}`}>
+                  <header className="panel-header">
+                    <div className="panel-title">
+                      <FileText size={16} className="title-icon text-purple-400" />
+                      <h2>Source Editor</h2>
+                    </div>
+                    <div className="panel-actions">
+                      <button 
+                        onClick={handleClearMarkdown} 
+                        className="panel-action-btn delete-btn" 
+                        title="Clear all text"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                      <button 
+                        onClick={() => setEditorMaximized(!editorMaximized)} 
+                        className="panel-action-btn expand-btn"
+                        title={editorMaximized ? "Restore view" : "Maximize editor"}
+                      >
+                        {editorMaximized ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+                      </button>
+                    </div>
+                  </header>
 
-          <div className="quote-mark-bottom">
-            <Quote size={48} />
-          </div>
+                  <div className="textarea-container">
+                    {/* Controlled TextArea Editor element */}
+                    <textarea
+                      id="editor"
+                      value={markdown}
+                      onChange={handleMarkdownChange}
+                      placeholder="Type some GitHub flavored markdown here..."
+                      className="editor-textarea"
+                    />
+                  </div>
+                  <footer className="panel-footer-stats">
+                    <span>Characters: {markdown.length}</span>
+                    <span>Lines: {markdown.split('\n').length}</span>
+                  </footer>
+                </section>
+              )}
 
-          {/* Quote Box Actions */}
-          <footer className="quote-box-footer">
-            <a
-              id="tweet-quote"
-              href={twitterIntentUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="action-button tweet-button"
-              title="Share this quote on Twitter"
+              {/* PREVIEW PANEL */}
+              {!editorMaximized && (
+                <section className={`panel-card preview-panel ${previewMaximized ? 'maximized' : ''}`}>
+                  <header className="panel-header">
+                    <div className="panel-title">
+                      <Eye size={16} className="title-icon text-emerald-400" />
+                      <h2>Aesthetic Preview</h2>
+                    </div>
+                    <div className="panel-actions">
+                      <button 
+                        onClick={() => setPreviewMaximized(!previewMaximized)} 
+                        className="panel-action-btn expand-btn"
+                        title={previewMaximized ? "Restore view" : "Maximize preview"}
+                      >
+                        {previewMaximized ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+                      </button>
+                    </div>
+                  </header>
+
+                  {/* Rendered Preview element */}
+                  <div 
+                    id="preview" 
+                    className="preview-viewport"
+                    dangerouslySetInnerHTML={getParsedHtml()}
+                  />
+                  <footer className="panel-footer-stats">
+                    <span>Format: GFM Output</span>
+                  </footer>
+                </section>
+              )}
+
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'quotes' && activeQuote && (
+          <div className="quotes-root">
+            {/* Elegant Header */}
+            <header className="app-header">
+              <div className="sparkle-tag">
+                <Sparkles className="sparkle-icon" size={14} />
+                <span>Sparks of Inspiration</span>
+              </div>
+              <h1>Whisperings of Wisdom</h1>
+            </header>
+
+            {/* Central Quote Box */}
+            <main 
+              id="quote-box" 
+              className="quote-box"
+              style={{ 
+                boxShadow: `0 8px 32px 0 rgba(0, 0, 0, 0.4), 0 0 40px 5px ${activeTheme?.glowColor || 'rgba(139, 92, 246, 0.2)'}` 
+              }}
             >
-              <TwitterIcon size={20} />
-              <span>Tweet Wisdom</span>
-            </a>
+              <div className="quote-mark-top">
+                <Quote size={48} />
+              </div>
 
-            <button
-              id="new-quote"
-              onClick={handleNewQuote}
-              className={`action-button new-quote-button ${isFading ? 'spinning' : ''}`}
-              title="Generate a new random quote"
-            >
-              <RefreshCw size={20} className="refresh-icon" />
-              <span>New Insight</span>
-            </button>
-          </footer>
-        </main>
+              <div className={`quote-content ${isFading ? 'fade-out' : 'fade-in'}`}>
+                <p id="text" className="quote-text">
+                  {activeQuote.text}
+                </p>
+                <div className="quote-divider" />
+                <p id="author" className="quote-author">
+                  — {activeQuote.author}
+                </p>
+              </div>
 
-        {/* Footer info */}
-        <footer className="app-footer">
-          <p>Crafted for FreeCodeCamp Quote Machine Project</p>
-          <span className="stats-indicator">Insights Explored: {totalQuotesCount + 1}</span>
+              <div className="quote-mark-bottom">
+                <Quote size={48} />
+              </div>
+
+              <footer className="quote-box-footer">
+                <a
+                  id="tweet-quote"
+                  href={twitterIntentUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="action-button tweet-button"
+                  title="Share this quote on Twitter"
+                >
+                  <TwitterIcon size={20} />
+                  <span>Tweet Wisdom</span>
+                </a>
+
+                <button
+                  id="new-quote"
+                  onClick={handleNewQuote}
+                  className={`action-button new-quote-button ${isFading ? 'spinning' : ''}`}
+                  title="Generate a new random quote"
+                >
+                  <RefreshCw size={20} className="refresh-icon" />
+                  <span>New Insight</span>
+                </button>
+              </footer>
+            </main>
+          </div>
+        )}
+
+        {/* Global Footer info */}
+        <footer className="app-footer spacer-top">
+          <p>Portfolio Development & Dashboard Suite</p>
+          <span className="stats-indicator">Active Domain: project01.andredev.web.id</span>
         </footer>
       </div>
     </div>
