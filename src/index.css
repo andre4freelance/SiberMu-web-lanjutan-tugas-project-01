@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Share+Tech+Mono&display=swap');
 
 :root {
   font-family: 'Outfit', sans-serif;
@@ -225,6 +225,287 @@ body {
 }
 
 /* ==========================================================================
+   DRUM MACHINE SYNTHESIZER
+   ========================================================================== */
+.drum-root {
+  width: 100%;
+  max-width: 860px;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.synth-rack {
+  width: 100%;
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 0.6) 100%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 2px solid rgba(255, 255, 255, 0.07);
+  border-radius: 28px;
+  padding: 2.5rem;
+  box-sizing: border-box;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 2px 0 rgba(255, 255, 255, 0.05);
+  position: relative;
+}
+
+.synth-rack::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  border-radius: 20px;
+  pointer-events: none;
+}
+
+.synth-body {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+/* 9 tactile pads grid */
+.pads-matrix {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.tactile-synth-pad {
+  aspect-ratio: 1;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: pointer;
+  outline: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: all 0.15s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+}
+
+.tactile-synth-pad:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+.tactile-synth-pad:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.tactile-synth-pad:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Pad visual glowing hit responses */
+.active-synth-pad {
+  background: rgba(168, 85, 247, 0.2) !important;
+  border-color: #a855f7 !important;
+  box-shadow: 0 0 20px 4px rgba(168, 85, 247, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+.pad-letter {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.pad-descriptor {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: rgba(255, 255, 255, 0.35);
+  text-transform: uppercase;
+}
+
+/* Right Control console panel */
+.controls-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  height: 100%;
+  justify-content: space-between;
+}
+
+/* Cathode Tube Display */
+.display-rack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.display-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+}
+
+.fluor-display {
+  background: #020617;
+  border: 2px solid rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 15px rgba(6, 182, 212, 0.1), 0 0 20px rgba(0, 0, 0, 0.5);
+  border-radius: 12px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 1.45rem;
+  color: #22d3ee;
+  text-shadow: 0 0 8px rgba(34, 211, 238, 0.6);
+  letter-spacing: 0.04em;
+  padding: 0 1.5rem;
+  box-sizing: border-box;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+}
+
+/* Control dials and sliders stack */
+.rack-sliders-switches {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.synth-knob-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.knob-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.3);
+  text-transform: uppercase;
+  display: block;
+}
+
+.power-switch-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.power-on {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.3);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.15);
+}
+
+.power-off {
+  background: rgba(244, 63, 94, 0.05);
+  color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.bank-switch-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.bank-switch-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.bank-switch-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.bank-switch-icon {
+  transition: transform 0.3s ease;
+}
+
+.bank-switch-icon.rotated {
+  transform: rotate(180deg);
+  color: #c084fc;
+}
+
+/* Volume Slider knob styles */
+.synth-slider-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.slider-labels {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.synth-volume-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.05);
+  outline: none;
+  transition: background 0.3s ease;
+}
+
+.synth-volume-slider:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.synth-volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.synth-volume-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* ==========================================================================
    MARKDOWN PREVIEWER WORKSPACE
    ========================================================================== */
 .previewer-root {
@@ -243,7 +524,6 @@ body {
   min-height: 600px;
 }
 
-/* Maximized layouts overrides */
 .workspace-panels.only-editor {
   grid-template-columns: 1fr;
 }
@@ -252,7 +532,6 @@ body {
   grid-template-columns: 1fr;
 }
 
-/* Panel Design Card */
 .panel-card {
   display: flex;
   flex-direction: column;
@@ -329,7 +608,6 @@ body {
   background: rgba(244, 63, 94, 0.1);
 }
 
-/* Editor Panel textarea styling */
 .textarea-container {
   flex-grow: 1;
   position: relative;
@@ -354,7 +632,6 @@ body {
   outline: none;
 }
 
-/* Preview Viewport styling */
 .preview-viewport {
   padding: 1.5rem 2rem;
   min-height: 480px;
@@ -364,7 +641,6 @@ body {
   text-align: left;
 }
 
-/* Maximized states inside workspace */
 .maximized .textarea-container {
   min-height: 650px;
 }
@@ -373,7 +649,6 @@ body {
   max-height: 750px;
 }
 
-/* Statistics row */
 .panel-footer-stats {
   padding: 0.5rem 1.5rem;
   background: rgba(0, 0, 0, 0.2);
@@ -717,8 +992,24 @@ body {
   }
 }
 
-/* Responsive grid layouts */
+/* ==========================================================================
+   RESPONSIVE DESIGN ADAPTATIONS
+   ========================================================================== */
 @media (max-width: 960px) {
+  .synth-rack {
+    padding: 1.75rem;
+    border-radius: 20px;
+  }
+
+  .synth-body {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .controls-panel {
+    gap: 1.5rem;
+  }
+
   .workspace-panels {
     grid-template-columns: 1fr;
     min-height: auto;
@@ -745,6 +1036,8 @@ body {
   .dashboard-nav {
     border-radius: 12px;
     padding: 0.25rem;
+    flex-wrap: wrap;
+    justify-content: center;
   }
   
   .nav-tab {
@@ -759,6 +1052,28 @@ body {
   
   .app-subtitle {
     font-size: 0.9rem;
+  }
+
+  .synth-rack {
+    padding: 1.25rem 1rem;
+  }
+
+  .pads-matrix {
+    gap: 0.6rem;
+  }
+
+  .tactile-synth-pad {
+    border-radius: 12px;
+  }
+
+  .pad-letter {
+    font-size: 1.4rem;
+  }
+
+  .fluor-display {
+    height: 70px;
+    font-size: 1.25rem;
+    padding: 0 1rem;
   }
   
   .quote-box {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { flushSync } from 'react-dom';
 import { marked } from 'marked';
-import { Quote, Sparkles, RefreshCw, FileText, Eye, BookOpen, Layers, Maximize2, Minimize2, Trash2 } from 'lucide-react';
+import { Quote, Sparkles, RefreshCw, FileText, Eye, Layers, Maximize2, Minimize2, Trash2, Music, Power, Sliders, ToggleLeft } from 'lucide-react';
 
 // Configure marked options globally to enable carriage returns as <br>
 marked.setOptions({
@@ -127,7 +127,81 @@ const THEMES = [
   }
 ];
 
-// Inline classic Twitter SVG icon to avoid external module dependency
+const DRUM_PADS = [
+  {
+    keyChar: 'Q',
+    keyCode: 81,
+    idHeater: 'Heater-1',
+    idPiano: 'Chord-1',
+    srcHeater: 'https://s3.amazonaws.com/freecodecamp/drums/Heater-1.mp3',
+    srcPiano: 'https://s3.amazonaws.com/freecodecamp/drums/Chord_1.mp3'
+  },
+  {
+    keyChar: 'W',
+    keyCode: 87,
+    idHeater: 'Heater-2',
+    idPiano: 'Chord-2',
+    srcHeater: 'https://s3.amazonaws.com/freecodecamp/drums/Heater-2.mp3',
+    srcPiano: 'https://s3.amazonaws.com/freecodecamp/drums/Chord_2.mp3'
+  },
+  {
+    keyChar: 'E',
+    keyCode: 69,
+    idHeater: 'Heater-3',
+    idPiano: 'Chord-3',
+    srcHeater: 'https://s3.amazonaws.com/freecodecamp/drums/Heater-3.mp3',
+    srcPiano: 'https://s3.amazonaws.com/freecodecamp/drums/Chord_3.mp3'
+  },
+  {
+    keyChar: 'A',
+    keyCode: 65,
+    idHeater: 'Heater-4',
+    idPiano: 'Give-us-a-Light',
+    srcHeater: 'https://s3.amazonaws.com/freecodecamp/drums/Heater-4.mp3',
+    srcPiano: 'https://s3.amazonaws.com/freecodecamp/drums/Give_us_a_light.mp3'
+  },
+  {
+    keyChar: 'S',
+    keyCode: 83,
+    idHeater: 'Clap',
+    idPiano: 'Dry-Ohh',
+    srcHeater: 'https://s3.amazonaws.com/freecodecamp/drums/Heater-6.mp3',
+    srcPiano: 'https://s3.amazonaws.com/freecodecamp/drums/Dry_Ohh.mp3'
+  },
+  {
+    keyChar: 'D',
+    keyCode: 68,
+    idHeater: 'Open-HH',
+    idPiano: 'Bld-Hhe',
+    srcHeater: 'https://s3.amazonaws.com/freecodecamp/drums/Dsc_Oh.mp3',
+    srcPiano: 'https://s3.amazonaws.com/freecodecamp/drums/Bld_Hhe.mp3'
+  },
+  {
+    keyChar: 'Z',
+    keyCode: 90,
+    idHeater: 'Kick-n-Hat',
+    idPiano: 'Punchy-Kick',
+    srcHeater: 'https://s3.amazonaws.com/freecodecamp/drums/Kick_n_Hat.mp3',
+    srcPiano: 'https://s3.amazonaws.com/freecodecamp/drums/punchy_kick_1.mp3'
+  },
+  {
+    keyChar: 'X',
+    keyCode: 88,
+    idHeater: 'Kick',
+    idPiano: 'Side-Stick',
+    srcHeater: 'https://s3.amazonaws.com/freecodecamp/drums/RP4_KICK_1.mp3',
+    srcPiano: 'https://s3.amazonaws.com/freecodecamp/drums/side_stick_1.mp3'
+  },
+  {
+    keyChar: 'C',
+    keyCode: 67,
+    idHeater: 'Closed-HH',
+    idPiano: 'Snare',
+    srcHeater: 'https://s3.amazonaws.com/freecodecamp/drums/Cev_H2.mp3',
+    srcPiano: 'https://s3.amazonaws.com/freecodecamp/drums/Brk_Snr.mp3'
+  }
+];
+
 const TwitterIcon = ({ size = 20, ...props }) => (
   <svg
     viewBox="0 0 24 24"
@@ -142,8 +216,14 @@ const TwitterIcon = ({ size = 20, ...props }) => (
 );
 
 function App() {
-  const [activeTab, setActiveTab] = useState('previewer'); // Default active tab is 'previewer' to pass FCC tests instantly
+  const [activeTab, setActiveTab] = useState('drum'); // Default active tab is 'drum' to pass Drum Machine FCC tests instantly
   
+  // Drum Machine Synthesizer State
+  const [drumDisplay, setDrumDisplay] = useState('AeroBeats Ready');
+  const [drumVolume, setDrumVolume] = useState(0.5);
+  const [drumPower, setDrumPower] = useState(true);
+  const [soundBank, setSoundBank] = useState(0); // 0 = Heater Kit, 1 = Smooth Piano Kit
+
   // Markdown Previewer State
   const [markdown, setMarkdown] = useState(DEFAULT_MARKDOWN);
   const [editorMaximized, setEditorMaximized] = useState(false);
@@ -153,7 +233,6 @@ function App() {
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
   const [currentThemeIndex, setCurrentThemeIndex] = useState(0);
   const [isFading, setIsFading] = useState(false);
-  const [totalQuotesCount, setTotalQuotesCount] = useState(0);
 
   // Initialize random quote and theme on mount
   useEffect(() => {
@@ -163,7 +242,79 @@ function App() {
     setCurrentThemeIndex(randomTheme);
   }, []);
 
-  // Controlled Editor Input - wrapped in flushSync for React 19 test suite compatibility
+  // Keyboard Event Hook for Drum Machine pads
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (activeTab !== 'drum' || !drumPower) return;
+      const key = e.key.toUpperCase();
+      const pad = DRUM_PADS.find(p => p.keyChar === key);
+      if (pad) {
+        const clipId = soundBank === 0 ? pad.idHeater : pad.idPiano;
+        playPadAudio(pad.keyChar, clipId);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [activeTab, drumPower, drumVolume, soundBank]);
+
+  // Audio Play Core Trigger
+  const playPadAudio = (keyChar, clipId) => {
+    if (!drumPower) return;
+    const audio = document.getElementById(keyChar);
+    if (audio) {
+      audio.currentTime = 0;
+      audio.volume = drumVolume;
+      
+      // Execute play promise
+      audio.play().catch(err => console.log("Audio block prevented:", err));
+      
+      // Simulate active tactile button glow
+      const padButton = document.getElementById(clipId);
+      if (padButton) {
+        padButton.classList.add('active-synth-pad');
+        setTimeout(() => padButton.classList.remove('active-synth-pad'), 120);
+      }
+
+      // Synchronous display state updates to satisfy React 19 test pipelines
+      flushSync(() => {
+        setDrumDisplay(clipId.replace(/-/g, ' '));
+      });
+    }
+  };
+
+  // Toggle power status
+  const handlePowerToggle = () => {
+    const nextPower = !drumPower;
+    setDrumPower(nextPower);
+    flushSync(() => {
+      setDrumDisplay(nextPower ? 'AeroBeats Ready' : 'POWER OFF');
+    });
+  };
+
+  // Switch sound bank
+  const handleSoundBankToggle = () => {
+    if (!drumPower) return;
+    const nextBank = soundBank === 0 ? 1 : 0;
+    setSoundBank(nextBank);
+    flushSync(() => {
+      setDrumDisplay(nextBank === 0 ? 'Heater Kit' : 'Smooth Piano');
+    });
+  };
+
+  // Volume slider adjustments
+  const handleVolumeChange = (e) => {
+    if (!drumPower) return;
+    const val = parseFloat(e.target.value);
+    setDrumVolume(val);
+    flushSync(() => {
+      setDrumDisplay(`Volume: ${Math.round(val * 100)}%`);
+    });
+  };
+
+  // Controlled Markdown Input - wrapped in flushSync for test compatibility
   const handleMarkdownChange = (e) => {
     flushSync(() => {
       setMarkdown(e.target.value);
@@ -194,7 +345,6 @@ function App() {
 
       setCurrentQuoteIndex(nextQuoteIndex);
       setCurrentThemeIndex(nextThemeIndex);
-      setTotalQuotesCount(prev => prev + 1);
       setIsFading(false);
     }, 400);
   };
@@ -228,6 +378,13 @@ function App() {
         {/* Elegant Portfolio Tab Controls */}
         <nav className="dashboard-nav">
           <button 
+            className={`nav-tab ${activeTab === 'drum' ? 'active-tab' : ''}`}
+            onClick={() => setActiveTab('drum')}
+          >
+            <Music size={16} />
+            <span>Drum Machine</span>
+          </button>
+          <button 
             className={`nav-tab ${activeTab === 'previewer' ? 'active-tab' : ''}`}
             onClick={() => setActiveTab('previewer')}
           >
@@ -244,6 +401,118 @@ function App() {
         </nav>
 
         {/* Dynamic Project Rendering */}
+
+        {/* DRUM MACHINE WORKSPACE */}
+        {activeTab === 'drum' && (
+          <div className="drum-root" id="drum-machine">
+            {/* Elegant Header */}
+            <header className="app-header">
+              <div className="sparkle-tag">
+                <Sparkles className="sparkle-icon" size={14} />
+                <span>Futuristic Synthesizer</span>
+              </div>
+              <h1>AeroBeats Drum Station</h1>
+              <p className="app-subtitle">A high-fidelity tactile drum synth pad console</p>
+            </header>
+
+            {/* Synthesizer Rack Console */}
+            <main className="synth-rack">
+              <div className="synth-body">
+                
+                {/* 9 Drum Pads Matrix Grid */}
+                <div className="pads-matrix">
+                  {DRUM_PADS.map(pad => {
+                    const clipId = soundBank === 0 ? pad.idHeater : pad.idPiano;
+                    const audioSrc = soundBank === 0 ? pad.srcHeater : pad.srcPiano;
+                    return (
+                      <button
+                        key={pad.keyChar}
+                        id={clipId}
+                        className="drum-pad tactile-synth-pad"
+                        onClick={() => playPadAudio(pad.keyChar, clipId)}
+                        disabled={!drumPower}
+                      >
+                        <span className="pad-letter">{pad.keyChar}</span>
+                        <span className="pad-descriptor">
+                          {drumPower ? (soundBank === 0 ? pad.idHeater : pad.idPiano).substring(0, 7) : '—'}
+                        </span>
+                        
+                        {/* Mandatory HTML5 audio element */}
+                        <audio
+                          id={pad.keyChar}
+                          className="clip"
+                          src={audioSrc}
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Control Panel Dials & Sliders */}
+                <div className="controls-panel">
+                  
+                  {/* Flourescent Cathode-Ray Display Element */}
+                  <div className="display-rack">
+                    <span className="display-label">SYSTEM STATE</span>
+                    <div id="display" className="fluor-display">
+                      {drumDisplay}
+                    </div>
+                  </div>
+
+                  <div className="rack-sliders-switches">
+                    {/* Power Dial Switch */}
+                    <div className="synth-knob-container">
+                      <span className="knob-label">SYSTEM POWER</span>
+                      <button 
+                        onClick={handlePowerToggle} 
+                        className={`power-switch-btn ${drumPower ? 'power-on' : 'power-off'}`}
+                      >
+                        <Power size={18} />
+                        <span>{drumPower ? 'ON' : 'OFF'}</span>
+                      </button>
+                    </div>
+
+                    {/* Volume Slider Knob */}
+                    <div className="synth-slider-container">
+                      <div className="slider-labels">
+                        <Sliders size={14} className="text-slate-400" />
+                        <span className="knob-label">VOLUME DIAL</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.01"
+                        value={drumVolume}
+                        onChange={handleVolumeChange}
+                        disabled={!drumPower}
+                        className="synth-volume-slider"
+                      />
+                    </div>
+
+                    {/* Bank Switch Control */}
+                    <div className="synth-knob-container">
+                      <span className="knob-label">SOUND BANK</span>
+                      <button 
+                        onClick={handleSoundBankToggle}
+                        disabled={!drumPower}
+                        className={`bank-switch-btn ${soundBank === 1 ? 'bank-smooth' : 'bank-heater'}`}
+                      >
+                        <ToggleLeft size={18} className={`bank-switch-icon ${soundBank === 1 ? 'rotated' : ''}`} />
+                        <span>{soundBank === 0 ? 'HEATER KIT' : 'AMBIENT PIANO'}</span>
+                      </button>
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+            </main>
+          </div>
+        )}
+
+        {/* MARKDOWN PREVIEWER WORKSPACE */}
         {activeTab === 'previewer' && (
           <div className="previewer-root">
             {/* Elegant Header */}
@@ -337,6 +606,7 @@ function App() {
           </div>
         )}
 
+        {/* RANDOM QUOTE WORKSPACE */}
         {activeTab === 'quotes' && activeQuote && (
           <div className="quotes-root">
             {/* Elegant Header */}
