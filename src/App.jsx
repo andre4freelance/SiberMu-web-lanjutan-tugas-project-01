@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { flushSync } from 'react-dom';
 import { marked } from 'marked';
-import { Quote, Sparkles, RefreshCw, FileText, Eye, Layers, Maximize2, Minimize2, Trash2, Music, Power, Sliders, ToggleLeft } from 'lucide-react';
+import { Quote, Sparkles, RefreshCw, FileText, Eye, Layers, Maximize2, Minimize2, Trash2, Music, Power, Sliders, ToggleLeft, Calculator } from 'lucide-react';
 
 // Configure marked options globally to enable carriage returns as <br>
 marked.setOptions({
@@ -216,7 +216,7 @@ const TwitterIcon = ({ size = 20, ...props }) => (
 );
 
 function App() {
-  const [activeTab, setActiveTab] = useState('drum'); // Default active tab is 'drum' to pass Drum Machine FCC tests instantly
+  const [activeTab, setActiveTab] = useState('calculator'); // Default active tab is 'calculator' to pass JavaScript Calculator FCC tests instantly
   
   // Drum Machine Synthesizer State
   const [drumDisplay, setDrumDisplay] = useState('AeroBeats Ready');
@@ -233,6 +233,153 @@ function App() {
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
   const [currentThemeIndex, setCurrentThemeIndex] = useState(0);
   const [isFading, setIsFading] = useState(false);
+
+  // JavaScript Calculator State
+  const [calcDisplay, setCalcDisplay] = useState('0');
+  const [calcFormula, setCalcFormula] = useState('');
+  const [calcEvaluated, setCalcEvaluated] = useState(false);
+
+  // Helper function to evaluate math formula expression safely and with high precision
+  const evaluateFormula = (expr) => {
+    try {
+      let sanitized = expr.replace(/x/g, '*');
+      const result = Function('"use strict"; return (' + sanitized + ')')();
+      if (result === undefined || isNaN(result)) {
+        return 'Error';
+      }
+      // Round to 12 decimal places and parse to Number to strip trailing zeros
+      return Number(result.toFixed(12)).toString();
+    } catch (e) {
+      return 'Error';
+    }
+  };
+
+  const handleCalcClear = () => {
+    flushSync(() => {
+      setCalcDisplay('0');
+      setCalcFormula('');
+      setCalcEvaluated(false);
+    });
+  };
+
+  const handleCalcNumber = (num) => {
+    flushSync(() => {
+      if (calcEvaluated) {
+        setCalcDisplay(num);
+        setCalcFormula(num === '0' ? '' : num);
+        setCalcEvaluated(false);
+        return;
+      }
+
+      if (num === '0' && calcDisplay === '0') {
+        return;
+      }
+
+      if (calcDisplay === '0') {
+        setCalcDisplay(num);
+        setCalcFormula(calcFormula === '0' ? num : calcFormula + num);
+      } else {
+        const isOperator = ['+', '-', '*', '/'].includes(calcDisplay);
+        if (isOperator) {
+          setCalcDisplay(num);
+        } else {
+          setCalcDisplay(calcDisplay + num);
+        }
+        setCalcFormula(calcFormula + num);
+      }
+    });
+  };
+
+  const handleCalcDecimal = () => {
+    flushSync(() => {
+      if (calcEvaluated) {
+        setCalcDisplay('0.');
+        setCalcFormula('0.');
+        setCalcEvaluated(false);
+        return;
+      }
+
+      const isLastOperator = ['+', '-', '*', '/'].includes(calcFormula.slice(-1)) || calcFormula === '';
+      if (isLastOperator) {
+        setCalcDisplay('0.');
+        setCalcFormula(calcFormula + '0.');
+        return;
+      }
+
+      if (!calcDisplay.includes('.')) {
+        setCalcDisplay(calcDisplay + '.');
+        setCalcFormula(calcFormula + '.');
+      }
+    });
+  };
+
+  const handleCalcOperator = (op) => {
+    flushSync(() => {
+      let currentFormula = calcFormula;
+
+      if (calcEvaluated) {
+        currentFormula = calcDisplay;
+        setCalcEvaluated(false);
+      }
+
+      if (currentFormula === '') {
+        if (op === '-') {
+          setCalcDisplay('-');
+          setCalcFormula('-');
+        }
+        return;
+      }
+
+      const lastChar = currentFormula.slice(-1);
+      const isLastOperator = ['+', '-', '*', '/'].includes(lastChar);
+
+      if (isLastOperator) {
+        const lastTwoChars = currentFormula.slice(-2);
+        const secondToLastChar = lastTwoChars.charAt(0);
+        const isSecondToLastOperator = ['+', '-', '*', '/'].includes(secondToLastChar);
+
+        if (op === '-') {
+          if (lastChar !== '-') {
+            setCalcDisplay('-');
+            setCalcFormula(currentFormula + '-');
+          }
+        } else {
+          if (isSecondToLastOperator) {
+            setCalcDisplay(op);
+            setCalcFormula(currentFormula.slice(0, -2) + op);
+          } else {
+            setCalcDisplay(op);
+            setCalcFormula(currentFormula.slice(0, -1) + op);
+          }
+        }
+      } else {
+        setCalcDisplay(op);
+        setCalcFormula(currentFormula + op);
+      }
+    });
+  };
+
+  const handleCalcEvaluate = () => {
+    flushSync(() => {
+      if (calcEvaluated || calcFormula === '') return;
+
+      let cleanFormula = calcFormula;
+      while (['+', '-', '*', '/'].includes(cleanFormula.slice(-1))) {
+        cleanFormula = cleanFormula.slice(0, -1);
+      }
+
+      if (cleanFormula === '') {
+        setCalcDisplay('0');
+        setCalcFormula('');
+        return;
+      }
+
+      const result = evaluateFormula(cleanFormula);
+      setCalcDisplay(result);
+      setCalcFormula(cleanFormula + '=' + result);
+      setCalcEvaluated(true);
+    });
+  };
 
   // Initialize random quote and theme on mount
   useEffect(() => {
@@ -379,6 +526,13 @@ function App() {
         {/* Elegant Portfolio Tab Controls */}
         <nav className="dashboard-nav">
           <button 
+            className={`nav-tab ${activeTab === 'calculator' ? 'active-tab' : ''}`}
+            onClick={() => setActiveTab('calculator')}
+          >
+            <Calculator size={16} />
+            <span>Calculator</span>
+          </button>
+          <button 
             className={`nav-tab ${activeTab === 'drum' ? 'active-tab' : ''}`}
             onClick={() => setActiveTab('drum')}
           >
@@ -402,6 +556,99 @@ function App() {
         </nav>
 
         {/* Dynamic Project Rendering */}
+
+        {/* JAVASCRIPT CALCULATOR WORKSPACE */}
+        {activeTab === 'calculator' && (
+          <div className="calc-root">
+            {/* Elegant Header */}
+            <header className="app-header">
+              <div className="sparkle-tag">
+                <Sparkles className="sparkle-icon" size={14} />
+                <span>AeroCalc Quantum</span>
+              </div>
+              <h1>AeroCalc Console</h1>
+              <p className="app-subtitle">A high-precision glassmorphic mathematical workspace</p>
+            </header>
+
+            {/* Main Calculator Console */}
+            <main className="calc-console">
+              <div className="calc-body">
+                {/* Curved Digital Screen Display */}
+                <div className="calc-screen">
+                  <div className="calc-formula-trace">
+                    {calcFormula || '0'}
+                  </div>
+                  <div id="display" className="calc-main-display">
+                    {calcDisplay}
+                  </div>
+                </div>
+
+                {/* Grid keyboard of 17 tactical buttons */}
+                <div className="calc-keypad">
+                  {/* Row 1 */}
+                  <button id="clear" className="calc-btn calc-btn-clear" onClick={handleCalcClear}>
+                    AC
+                  </button>
+                  <button id="divide" className="calc-btn calc-btn-operator" onClick={() => handleCalcOperator('/')}>
+                    /
+                  </button>
+                  <button id="multiply" className="calc-btn calc-btn-operator" onClick={() => handleCalcOperator('x')}>
+                    x
+                  </button>
+
+                  {/* Row 2 */}
+                  <button id="seven" className="calc-btn" onClick={() => handleCalcNumber('7')}>
+                    7
+                  </button>
+                  <button id="eight" className="calc-btn" onClick={() => handleCalcNumber('8')}>
+                    8
+                  </button>
+                  <button id="nine" className="calc-btn" onClick={() => handleCalcNumber('9')}>
+                    9
+                  </button>
+                  <button id="subtract" className="calc-btn calc-btn-operator" onClick={() => handleCalcOperator('-')}>
+                    -
+                  </button>
+
+                  {/* Row 3 */}
+                  <button id="four" className="calc-btn" onClick={() => handleCalcNumber('4')}>
+                    4
+                  </button>
+                  <button id="five" className="calc-btn" onClick={() => handleCalcNumber('5')}>
+                    5
+                  </button>
+                  <button id="six" className="calc-btn" onClick={() => handleCalcNumber('6')}>
+                    6
+                  </button>
+                  <button id="add" className="calc-btn calc-btn-operator" onClick={() => handleCalcOperator('+')}>
+                    +
+                  </button>
+
+                  {/* Row 4 & 5 combined (Grid handles placing zero, decimal, equals) */}
+                  <button id="one" className="calc-btn" onClick={() => handleCalcNumber('1')}>
+                    1
+                  </button>
+                  <button id="two" className="calc-btn" onClick={() => handleCalcNumber('2')}>
+                    2
+                  </button>
+                  <button id="three" className="calc-btn" onClick={() => handleCalcNumber('3')}>
+                    3
+                  </button>
+                  <button id="equals" className="calc-btn calc-btn-equals" onClick={handleCalcEvaluate}>
+                    =
+                  </button>
+
+                  <button id="zero" className="calc-btn calc-btn-zero" onClick={() => handleCalcNumber('0')}>
+                    0
+                  </button>
+                  <button id="decimal" className="calc-btn" onClick={handleCalcDecimal}>
+                    .
+                  </button>
+                </div>
+              </div>
+            </main>
+          </div>
+        )}
 
         {/* DRUM MACHINE WORKSPACE */}
         {activeTab === 'drum' && (
