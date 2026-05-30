@@ -1292,3 +1292,296 @@ body {
     aspect-ratio: 1;
   }
 }
+
+/* 25 + 5 POMODORO CLOCK STYLE SHEETS */
+.clock-root {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.clock-console {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 28px;
+  padding: 2rem;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.8rem;
+}
+
+.clock-console::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+}
+
+/* Adjusters side by side panel */
+.clock-settings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.adjuster-card {
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 18px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.adjuster-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.85rem;
+  color: rgba(248, 250, 252, 0.6);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.adjuster-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.adjuster-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #f8fafc;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: all 0.15s ease;
+  outline: none;
+}
+
+.adjuster-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.adjuster-btn:active {
+  transform: translateY(1px);
+}
+
+.adjuster-value {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #38bdf8;
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+  min-width: 24px;
+  text-align: center;
+}
+
+/* Circular Chronometer HUD Display */
+.clock-hud {
+  position: relative;
+  width: 210px;
+  height: 210px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid rgba(255, 255, 255, 0.04);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: inset 0 5px 25px rgba(0, 0, 0, 0.8), 0 0 15px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  transition: all 0.5s ease;
+}
+
+.hud-ring-glowing {
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+}
+
+/* Session vs Break HUD states */
+.hud-session {
+  border-color: rgba(14, 165, 233, 0.15);
+  box-shadow: inset 0 5px 25px rgba(0, 0, 0, 0.8), 0 0 20px rgba(14, 165, 233, 0.15);
+}
+
+.hud-session .hud-time {
+  color: #38bdf8;
+  text-shadow: 0 0 15px rgba(56, 189, 248, 0.6);
+}
+
+.hud-session .hud-period {
+  color: rgba(56, 189, 248, 0.7);
+}
+
+.hud-break {
+  border-color: rgba(236, 72, 153, 0.15);
+  box-shadow: inset 0 5px 25px rgba(0, 0, 0, 0.8), 0 0 20px rgba(236, 72, 153, 0.15);
+}
+
+.hud-break .hud-time {
+  color: #ec4899;
+  text-shadow: 0 0 15px rgba(236, 72, 153, 0.6);
+}
+
+.hud-break .hud-period {
+  color: rgba(236, 72, 153, 0.7);
+}
+
+/* Pulsing ambient animations when running */
+@keyframes breathing-session {
+  0%, 100% { box-shadow: inset 0 5px 25px rgba(0, 0, 0, 0.8), 0 0 20px rgba(14, 165, 233, 0.15); border-color: rgba(14, 165, 233, 0.15); }
+  50% { box-shadow: inset 0 5px 25px rgba(0, 0, 0, 0.8), 0 0 35px rgba(14, 165, 233, 0.35); border-color: rgba(14, 165, 233, 0.3); }
+}
+
+@keyframes breathing-break {
+  0%, 100% { box-shadow: inset 0 5px 25px rgba(0, 0, 0, 0.8), 0 0 20px rgba(236, 72, 153, 0.15); border-color: rgba(236, 72, 153, 0.15); }
+  50% { box-shadow: inset 0 5px 25px rgba(0, 0, 0, 0.8), 0 0 35px rgba(236, 72, 153, 0.35); border-color: rgba(236, 72, 153, 0.3); }
+}
+
+.hud-active.hud-session {
+  animation: breathing-session 2s infinite ease-in-out;
+}
+
+.hud-active.hud-break {
+  animation: breathing-break 2s infinite ease-in-out;
+}
+
+.hud-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  z-index: 10;
+}
+
+.hud-period {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 600;
+}
+
+.hud-time {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 3.5rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+/* Operation controls */
+.clock-controls {
+  display: flex;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.clock-control-btn {
+  flex: 1;
+  padding: 0.85rem 1.5rem;
+  border-radius: 16px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  outline: none;
+}
+
+.btn-start {
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+  border: none;
+  color: #ffffff;
+  box-shadow: 0 0 15px rgba(14, 165, 233, 0.3);
+}
+
+.btn-start:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 25px rgba(14, 165, 233, 0.5);
+  background: linear-gradient(135deg, #38bdf8, #3b82f6);
+}
+
+.btn-active-pause {
+  background: linear-gradient(135deg, #e11d48, #be123c);
+  box-shadow: 0 0 15px rgba(225, 29, 72, 0.3);
+}
+
+.btn-active-pause:hover {
+  background: linear-gradient(135deg, #f43f5e, #e11d48);
+  box-shadow: 0 0 25px rgba(225, 29, 72, 0.5);
+}
+
+.btn-reset {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+}
+
+.btn-reset:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.btn-reset:active {
+  transform: translateY(1px);
+}
+
+/* Mobile adjustments */
+@media (max-width: 640px) {
+  .clock-console {
+    padding: 1.5rem;
+    gap: 1.5rem;
+  }
+
+  .clock-settings {
+    gap: 1rem;
+  }
+
+  .adjuster-card {
+    padding: 0.75rem;
+  }
+
+  .clock-hud {
+    width: 170px;
+    height: 170px;
+  }
+
+  .hud-time {
+    font-size: 2.8rem;
+  }
+
+  .clock-control-btn {
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+  }
+}

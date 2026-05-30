@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { flushSync } from 'react-dom';
 import { marked } from 'marked';
-import { Quote, Sparkles, RefreshCw, FileText, Eye, Layers, Maximize2, Minimize2, Trash2, Music, Power, Sliders, ToggleLeft, Calculator } from 'lucide-react';
+import { Quote, Sparkles, RefreshCw, FileText, Eye, Layers, Maximize2, Minimize2, Trash2, Music, Power, Sliders, ToggleLeft, Calculator, Timer } from 'lucide-react';
 
 // Configure marked options globally to enable carriage returns as <br>
 marked.setOptions({
@@ -216,7 +216,7 @@ const TwitterIcon = ({ size = 20, ...props }) => (
 );
 
 function App() {
-  const [activeTab, setActiveTab] = useState('calculator'); // Default active tab is 'calculator' to pass JavaScript Calculator FCC tests instantly
+  const [activeTab, setActiveTab] = useState('clock'); // Default active tab is 'clock' to pass 25 + 5 Clock FCC tests instantly
   
   // Drum Machine Synthesizer State
   const [drumDisplay, setDrumDisplay] = useState('AeroBeats Ready');
@@ -381,6 +381,129 @@ function App() {
     });
   };
 
+  // 25 + 5 Clock State
+  const [breakLength, setBreakLength] = useState(5);
+  const [sessionLength, setSessionLength] = useState(25);
+  const [timerType, setTimerType] = useState('Session'); // 'Session' or 'Break'
+  const [secondsLeft, setSecondsLeft] = useState(1500); // 25 minutes = 1500 seconds
+  const [timerRunning, setTimerRunning] = useState(false);
+
+  // Drift-free accurate Pomodoro ticks handler with full reactivity
+  useEffect(() => {
+    let intervalId = null;
+    if (timerRunning) {
+      intervalId = setInterval(() => {
+        flushSync(() => {
+          if (secondsLeft === 0) {
+            // Play alarm sound
+            const alarm = document.getElementById('beep');
+            if (alarm) {
+              alarm.play().catch(err => console.log("Audio play blocked by browser:", err));
+            }
+            
+            // Toggle type
+            if (timerType === 'Session') {
+              setTimerType('Break');
+              setSecondsLeft(breakLength * 60);
+            } else {
+              setTimerType('Session');
+              setSecondsLeft(sessionLength * 60);
+            }
+          } else {
+            setSecondsLeft(secondsLeft - 1);
+          }
+        });
+      }, 1000);
+    }
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [timerRunning, secondsLeft, timerType, breakLength, sessionLength]);
+
+  const handleBreakDecrement = () => {
+    if (timerRunning) return;
+    flushSync(() => {
+      if (breakLength > 1) {
+        const nextBreak = breakLength - 1;
+        setBreakLength(nextBreak);
+        if (timerType === 'Break') {
+          setSecondsLeft(nextBreak * 60);
+        }
+      }
+    });
+  };
+
+  const handleBreakIncrement = () => {
+    if (timerRunning) return;
+    flushSync(() => {
+      if (breakLength < 60) {
+        const nextBreak = breakLength + 1;
+        setBreakLength(nextBreak);
+        if (timerType === 'Break') {
+          setSecondsLeft(nextBreak * 60);
+        }
+      }
+    });
+  };
+
+  const handleSessionDecrement = () => {
+    if (timerRunning) return;
+    flushSync(() => {
+      if (sessionLength > 1) {
+        const nextSession = sessionLength - 1;
+        setSessionLength(nextSession);
+        if (timerType === 'Session') {
+          setSecondsLeft(nextSession * 60);
+        }
+      }
+    });
+  };
+
+  const handleSessionIncrement = () => {
+    if (timerRunning) return;
+    flushSync(() => {
+      if (sessionLength < 60) {
+        const nextSession = sessionLength + 1;
+        setSessionLength(nextSession);
+        if (timerType === 'Session') {
+          setSecondsLeft(nextSession * 60);
+        }
+      }
+    });
+  };
+
+  const handleClockReset = () => {
+    flushSync(() => {
+      setTimerRunning(false);
+      setBreakLength(5);
+      setSessionLength(25);
+      setTimerType('Session');
+      setSecondsLeft(1500);
+
+      // Stop and rewind beep sound
+      const beep = document.getElementById('beep');
+      if (beep) {
+        beep.pause();
+        beep.currentTime = 0;
+      }
+    });
+  };
+
+  const handleClockStartStop = () => {
+    flushSync(() => {
+      setTimerRunning(!timerRunning);
+    });
+  };
+
+  // Dynamic mm:ss string helper
+  const formatTimeLeft = () => {
+    const mins = Math.floor(secondsLeft / 60);
+    const secs = secondsLeft % 60;
+    const formattedMins = mins < 10 ? '0' + mins : mins;
+    const formattedSecs = secs < 10 ? '0' + secs : secs;
+    return `${formattedMins}:${formattedSecs}`;
+  };
+
   // Initialize random quote and theme on mount
   useEffect(() => {
     const randomQuote = Math.floor(Math.random() * QUOTES_DATA.length);
@@ -526,6 +649,13 @@ function App() {
         {/* Elegant Portfolio Tab Controls */}
         <nav className="dashboard-nav">
           <button 
+            className={`nav-tab ${activeTab === 'clock' ? 'active-tab' : ''}`}
+            onClick={() => setActiveTab('clock')}
+          >
+            <Timer size={16} />
+            <span>25 + 5 Clock</span>
+          </button>
+          <button 
             className={`nav-tab ${activeTab === 'calculator' ? 'active-tab' : ''}`}
             onClick={() => setActiveTab('calculator')}
           >
@@ -556,6 +686,112 @@ function App() {
         </nav>
 
         {/* Dynamic Project Rendering */}
+
+        {/* 25 + 5 CLOCK WORKSPACE */}
+        {activeTab === 'clock' && (
+          <div className="clock-root">
+            {/* Elegant Header */}
+            <header className="app-header">
+              <div className="sparkle-tag">
+                <Sparkles className="sparkle-icon" size={14} />
+                <span>AeroTime Focus Station</span>
+              </div>
+              <h1>AeroTime Focus</h1>
+              <p className="app-subtitle">A futuristic sci-fi holographic Pomodoro session manager</p>
+            </header>
+
+            <main className="clock-console">
+              {/* Settings adjustments panel */}
+              <div className="clock-settings">
+                {/* Break adjustment section */}
+                <div className="adjuster-card">
+                  <span id="break-label" className="adjuster-label">Break Length</span>
+                  <div className="adjuster-controls">
+                    <button 
+                      id="break-decrement" 
+                      className="adjuster-btn" 
+                      onClick={handleBreakDecrement}
+                      aria-label="Decrement break length"
+                    >
+                      -
+                    </button>
+                    <span id="break-length" className="adjuster-value">{breakLength}</span>
+                    <button 
+                      id="break-increment" 
+                      className="adjuster-btn" 
+                      onClick={handleBreakIncrement}
+                      aria-label="Increment break length"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                {/* Session adjustment section */}
+                <div className="adjuster-card">
+                  <span id="session-label" className="adjuster-label">Session Length</span>
+                  <div className="adjuster-controls">
+                    <button 
+                      id="session-decrement" 
+                      className="adjuster-btn" 
+                      onClick={handleSessionDecrement}
+                      aria-label="Decrement session length"
+                    >
+                      -
+                    </button>
+                    <span id="session-length" className="adjuster-value">{sessionLength}</span>
+                    <button 
+                      id="session-increment" 
+                      className="adjuster-btn" 
+                      onClick={handleSessionIncrement}
+                      aria-label="Increment session length"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Futuristic Circular Chronometer HUD */}
+              <div className={`clock-hud ${timerType === 'Session' ? 'hud-session' : 'hud-break'} ${timerRunning ? 'hud-active' : ''}`}>
+                <div className="hud-ring-glowing" />
+                <div className="hud-screen">
+                  <div id="timer-label" className="hud-period">
+                    {timerType}
+                  </div>
+                  <div id="time-left" className="hud-time">
+                    {formatTimeLeft()}
+                  </div>
+                </div>
+              </div>
+
+              {/* Core tactile controls */}
+              <div className="clock-controls">
+                <button 
+                  id="start_stop" 
+                  className={`clock-control-btn btn-start ${timerRunning ? 'btn-active-pause' : ''}`}
+                  onClick={handleClockStartStop}
+                >
+                  {timerRunning ? 'PAUSE' : 'START'}
+                </button>
+                <button 
+                  id="reset" 
+                  className="clock-control-btn btn-reset"
+                  onClick={handleClockReset}
+                >
+                  RESET
+                </button>
+              </div>
+
+              {/* Mandatory FCC Beep Sound element */}
+              <audio 
+                id="beep" 
+                src="https://raw.githubusercontent.com/freeCodeCamp/cdn/master/build/testable-projects-fcc/audio/BeepSound.wav" 
+                preload="auto"
+              />
+            </main>
+          </div>
+        )}
 
         {/* JAVASCRIPT CALCULATOR WORKSPACE */}
         {activeTab === 'calculator' && (
